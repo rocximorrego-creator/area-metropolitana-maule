@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Área Metropolitana del Maule</title>
+<meta name="description" content="Estudio para la conformación del Área Metropolitana del Maule: Talca, Maule, San Clemente, Pelarco, San Rafael, Pencahue y San Javier.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css">
+<style>
+  :root{
+    --verde:#81a78a; --amarillo:#eaa629; --rojo:#e95c62; --azul:#6c92cb;
+    --tinta:#1a1a1a; --blanco:#fff;
+    --f:"Work Sans","Segoe UI",system-ui,sans-serif;
+    --ancho:1240px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  html,body{margin:0}
+  body{background:var(--blanco);color:var(--tinta);font:400 18px/1.6 var(--f)}
+  img{max-width:100%;height:auto;display:block}
+  a{color:var(--azul)}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--amarillo);outline-offset:3px}
+  .cont{max-width:var(--ancho);margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+  .texto p{max-width:72ch}
+  .texto p{margin:0 0 1em}
+
+  /* Cabecera */
+  .cab .cont{display:flex;justify-content:flex-end;align-items:center;gap:clamp(24px,5vw,72px);padding-block:22px}
+  .cab img{height:clamp(42px,5vw,72px);width:auto}
+  nav.menu{background:var(--azul);border-radius:0 0 22px 22px;position:sticky;top:0;z-index:20}
+  nav.menu ul{list-style:none;margin:0 auto;padding:0 20px;max-width:1500px;display:flex;justify-content:space-around;flex-wrap:wrap}
+  nav.menu a{display:block;color:#fff;text-decoration:none;font-weight:500;font-size:clamp(15px,1.4vw,20px);padding:18px 12px}
+  nav.menu a:hover{text-decoration:underline}
+
+  /* Portada */
+  .hero{background:url(img/patron.png) repeat;background-size:440px auto;padding-block:clamp(48px,8vw,130px)}
+  .hero img{margin:0 auto;width:min(960px,92%)}
+  .hero h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  /* Títulos de sección: cinta redondeada */
+  section{scroll-margin-top:70px}
+  .cinta{display:inline-block;margin:clamp(48px,6vw,80px) 0 40px;color:#fff;font:400 clamp(26px,3vw,48px)/1.2 var(--f);padding:14px clamp(32px,4vw,90px) 14px max(20px,calc((100vw - var(--ancho))/2 + 20px));border-radius:0 60px 60px 0;min-width:min(560px,90vw)}
+  .c-verde{background:var(--verde)} .c-amarillo{background:var(--amarillo)} .c-rojo{background:var(--rojo)} .c-azul{background:var(--azul)}
+  .sub{color:var(--azul);font-weight:700;text-decoration:underline;text-underline-offset:4px;margin:1.6em 0 1em}
+
+  /* Criterios */
+  .criterios{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,4vw,64px);margin:0 0 40px}
+  .crit{text-align:center}
+  .circ{aspect-ratio:1;max-width:100%;width:min(100%,250px);margin-inline:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:400;font-size:clamp(22px,3.6vw,52px);margin-bottom:24px}
+  .crit p{margin:0}
+
+  /* Cifras */
+  .cifras{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin:40px 0 0}
+  .cifra{background:var(--azul);color:#fff;border-radius:36px;padding:clamp(24px,3vw,48px)}
+  .cifra b{display:block;font-weight:200;font-size:clamp(56px,7vw,110px);line-height:1;font-variant-numeric:tabular-nums}
+  .cifra span{display:block;font-weight:300;font-size:clamp(17px,1.6vw,22px);margin-top:16px;line-height:1.45}
+
+  /* Etapas */
+  .etapas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,3vw,52px);margin:60px 0 0}
+  .etapa{position:relative;padding-top:48px}
+  .etapa .n{position:absolute;top:0;left:-16px;width:96px;height:96px;border-radius:50%;border:4px solid #fff;color:#fff;font:500 56px/88px var(--f);text-align:center}
+  .etapa .caja{border-radius:36px 36px 36px 36px;border-top-left-radius:0;color:#fff;font-weight:300;font-size:clamp(17px,1.6vw,22px);line-height:1.45;padding:72px 28px 40px;min-height:290px}
+
+  /* Comunas + visor */
+  .comunas{display:grid;grid-template-columns:minmax(0,3fr) minmax(220px,1fr);gap:clamp(20px,4vw,72px);align-items:start}
+  #viewDiv{height:min(72vh,720px);min-height:420px;border-radius:28px;overflow:hidden;border:3px solid var(--azul);position:relative;background:#eef2f8}
+  #estado{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#555;pointer-events:none}
+  .lista-com{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+  .lista-com button{all:unset;cursor:pointer;display:flex;align-items:center;gap:16px;font-size:clamp(20px,2vw,34px);padding:6px 0}
+  .lista-com button::before{content:"";width:.5em;height:.5em;border:2px solid var(--tinta);flex:none}
+  .lista-com button:hover,.lista-com button[aria-pressed="true"]{color:var(--azul)}
+  .lista-com button[aria-pressed="true"]::before{background:var(--azul);border-color:var(--azul)}
+  .lista-com button:focus-visible{outline:3px solid var(--amarillo)}
+  .nota-mapa{font-size:15px;color:#555;margin:14px 0 0}
+  .nota-mapa a{font-weight:500}
+
+  /* Hitos */
+  .hitos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:1100px;margin:0 auto;position:relative}
+  .hitos::before{content:"";position:absolute;top:calc(min(230px,22vw)/2);left:16%;right:16%;height:12px;background:var(--azul);z-index:0}
+  .hito{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
+  .hito img{width:min(230px,22vw);border-radius:50%}
+  .hito p{margin:20px 0 0;font-size:clamp(17px,1.8vw,26px);font-weight:300;line-height:1.35;width:min(230px,26vw)}
+
+  /* Noticias */
+  .noticias{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(20px,2.5vw,36px)}
+  .noti img{border:6px solid var(--azul);border-radius:36px;aspect-ratio:3/2;object-fit:cover;width:100%}
+  .noti h3{margin:24px 0 12px;font-size:clamp(19px,1.8vw,26px);font-weight:700;line-height:1.3}
+  .noti h3 a{color:var(--azul)}
+  .noti p{margin:0 0 16px}
+  .btn-leer{display:block;margin-left:auto;width:max-content;background:var(--rojo);color:#fff;text-decoration:none;letter-spacing:.06em;font-weight:300;font-size:15px;padding:4px 22px;border-radius:20px}
+
+  /* Descargas */
+  .descargas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;max-width:1300px;margin:0 auto}
+  .desc{display:flex;flex-direction:column;align-items:center;gap:22px;text-decoration:none}
+  .desc img{width:min(230px,22vw)}
+  .desc span{font-weight:700;font-size:clamp(17px,2vw,30px);text-decoration:underline;text-underline-offset:4px;color:var(--azul)}
+
+  footer{background:var(--rojo);margin-top:80px}
+  footer .cont{display:flex;justify-content:flex-end;padding-block:clamp(60px,10vw,150px)}
+  footer img{width:min(560px,80vw)}
+
+  @media (max-width:900px){
+    body{font-size:17px}
+    .criterios,.etapas{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cifras,.noticias{grid-template-columns:minmax(0,1fr)}
+    .comunas{grid-template-columns:minmax(0,1fr)}
+    .lista-com{grid-template-columns:repeat(2,minmax(0,1fr));order:-1}
+    .etapa .caja{min-height:0}
+  }
+  @media (max-width:560px){
+    .hitos,.descargas{grid-template-columns:minmax(0,1fr);gap:32px}
+    .hitos::before{display:none}
+    .hito img,.desc img{width:160px}
+    .hito p{width:auto;text-align:center}
+    .etapa .n{width:72px;height:72px;font-size:40px;line-height:64px;left:-8px}
+    .etapa{padding-top:36px}
+    .etapa .caja{padding:52px 20px 28px}
+    #viewDiv{height:62vh}
+    nav.menu a{padding:12px 8px}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="cab">
+  <div class="cont">
+    <img src="img/logo_am.png" alt="Área Metropolitana del Maule, juntos crecemos mejor">
+    <img src="img/logo_gore.png" alt="Gobierno del Maule">
+  </div>
+</header>
+<nav class="menu" aria-label="Secciones">
+  <ul>
+    <li><a href="#que-es">¿Qué es?</a></li>
+    <li><a href="#estudio">El estudio</a></li>
+    <li><a href="#comunas">Las 7 comunas</a></li>
+    <li><a href="#hitos">Hitos</a></li>
+    <li><a href="#noticias">Noticias</a></li>
+    <li><a href="#documentos">Documentos</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <h1>Área Metropolitana del Maule: juntos, crecemos mejor</h1>
+  <img src="img/logo_hero.png" alt="">
+</div>
+
+<section id="que-es">
+  <h2 class="cinta c-verde">¿Qué es un área metropolitana?</h2>
+  <div class="cont texto">
+    <p>Un área metropolitana es un territorio formado por dos o más comunas de una misma región que están unidas por un continuo de construcciones urbanas, comparten la utilización de infraestructura y servicios urbanos y, en conjunto, superan los 250.000 habitantes.</p>
+    <p>La Ley 21.074 de Fortalecimiento de la Regionalización del País (2018) otorga a los Gobiernos Regionales nuevas atribuciones para administrarlas, con el fin de mejorar la planificación territorial, el transporte, la infraestructura y los servicios públicos, en coordinación con los municipios.</p>
+    <p class="sub">Criterios mínimos para constituir un área metropolitana:</p>
+    <div class="criterios">
+      <div class="crit"><div class="circ c-verde">≥2</div><p>Estar formada por dos o más comunas de una misma región.</p></div>
+      <div class="crit"><div class="circ c-amarillo">≥250.000</div><p>Superar, en conjunto, los 250.000 habitantes.</p></div>
+      <div class="crit"><img class="circ" src="img/ic_fabrica.png" alt=""><p>Presentar un continuo de construcciones urbanas entre las comunas.</p></div>
+      <div class="crit"><img class="circ" src="img/ic_grua.png" alt=""><p>Compartir el uso de infraestructura, equipamientos y servicios urbanos.</p></div>
+    </div>
+    <p class="sub">Una sola gran ciudad</p>
+    <p>En la vida diaria, estas siete comunas ya funcionan como una sola gran ciudad: Talca concentra el empleo, los servicios y el comercio, y los habitantes de las comunas vecinas se desplazan hacia ella para trabajar, estudiar o hacer trámites.</p>
+    <div class="cifras">
+      <div class="cifra"><b>53%</b><span>trabajadores que viven en Maule trabaja en Talca</span></div>
+      <div class="cifra"><b>x4,4</b><span>creció la población entre el censo de 1992 y 2024</span></div>
+      <div class="cifra"><b>26%</b><span>de la población regional reside en Talca y Maule</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="estudio">
+  <h2 class="cinta c-amarillo">El estudio</h2>
+  <div class="cont texto">
+    <p>El Gobierno Regional del Maule impulsa el estudio “Elaboración de los Antecedentes para la Conformación de Áreas Metropolitanas en la Región del Maule”. Su objetivo es <strong>proponer una delimitación para el área metropolitana y entregar los lineamientos para su futura administración,</strong> mediante un diagnóstico técnico y un proceso participativo con municipios, servicios públicos, academia, sector privado y sociedad civil.</p>
+    <p class="sub">¿Cómo me afecta?</p>
+    <p>Una gestión metropolitana permite coordinar decisiones que hoy se toman por separado. Esa coordinación puede traducirse en un mejor transporte entre comunas, servicios más cercanos, un crecimiento urbano más ordenado y una inversión pública mejor focalizada.</p>
+    <p class="sub">Etapas del estudio</p>
+    <ol class="etapas" style="list-style:none;padding:0">
+      <li class="etapa"><span class="n c-rojo">1</span><div class="caja c-verde">Participación, comunicación e información base</div></li>
+      <li class="etapa"><span class="n c-amarillo">2</span><div class="caja c-azul">Crecimiento urbano, diagnóstico y prospectiva</div></li>
+      <li class="etapa"><span class="n c-azul">3</span><div class="caja c-rojo">Delimitación del Área Metropolitana</div></li>
+      <li class="etapa"><span class="n c-verde">4</span><div class="caja c-amarillo">Plan de Acción Metropolitano</div></li>
+    </ol>
+  </div>
+</section>
+
+<section id="comunas">
+  <h2 class="cinta c-rojo">Las 7 comunas</h2>
+  <div class="cont">
+    <div class="comunas">
+      <div>
+        <div id="viewDiv" role="region" aria-label="Mapa interactivo del Área Metropolitana del Maule"><div id="estado">Cargando mapa…</div></div>
+        <p class="nota-mapa">Usa los botones del mapa para activar capas, ver la leyenda y cambiar el mapa base. Haz clic en una zona para ver sus datos. <a href="https://ocuc.maps.arcgis.com/apps/mapviewer/index.html?webmap=77f5fd410a1049dab78744c059baba0b" target="_blank" rel="noopener">Abrir en ArcGIS Online</a></p>
+      </div>
+      <ul class="lista-com" aria-label="Ir a una comuna">
+        <li><button type="button" data-c="Pencahue">Pencahue</button></li>
+        <li><button type="button" data-c="San Javier">San Javier</button></li>
+        <li><button type="button" data-c="Maule">Maule</button></li>
+        <li><button type="button" data-c="Talca">Talca</button></li>
+        <li><button type="button" data-c="San Rafael">San Rafael</button></li>
+        <li><button type="button" data-c="Pelarco">Pelarco</button></li>
+        <li><button type="button" data-c="San Clemente">San Clemente</button></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="hitos">
+  <h2 class="cinta c-azul">Hitos</h2>
+  <div class="cont">
+    <div class="hitos">
+      <div class="hito"><img src="img/ic_acuerdo.png" alt=""><p>Acuerdo político y gobernanza</p></div>
+      <div class="hito"><img src="img/ic_doc.png" alt=""><p>Trabajo técnico y validación experta</p></div>
+      <div class="hito"><img src="img/ic_part.png" alt=""><p>Participación ciudadana y sectorial</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="noticias">
+  <h2 class="cinta c-verde">Noticias</h2>
+  <div class="cont">
+    <div class="noticias">
+      <article class="noti"><img src="img/noticia.jpg" alt="Reunión de trabajo del Gobierno Regional del Maule"><h3><a href="#">GORE Maule inicia la reflexión institucional sobre el Área Metropolitana</a></h3><p>Funcionarios y funcionarias del Gobierno Regional participaron en el Taller de…</p><a class="btn-leer" href="#">SEGUIR LEYENDO</a></article>
+      <article class="noti"><img src="img/noticia.jpg" alt="Autoridades locales reunidas en mesa de trabajo"><h3><a href="#">Autoridades locales debaten el futuro metropolitano del Maule</a></h3><p>El equipo del GORE, consejeros regionales, alcaldes y equipos técnicos municipales…</p><a class="btn-leer" href="#">SEGUIR LEYENDO</a></article>
+      <article class="noti"><img src="img/noticia.jpg" alt="Participantes de la encuesta sobre el Área Metropolitana"><h3><a href="#">106 voces opinan sobre el Área Metropolitana</a></h3><p>La encuesta “100 opiniones clave sobre el Área Metropolitana de Maule”…</p><a class="btn-leer" href="#">SEGUIR LEYENDO</a></article>
+    </div>
+  </div>
+</section>
+
+<section id="documentos">
+  <h2 class="cinta c-amarillo">Descargas</h2>
+  <div class="cont">
+    <div class="descargas">
+      <a class="desc" href="#"><img src="img/ic_descarga.png" alt=""><span>Descargar Informe 1</span></a>
+      <a class="desc" href="#"><img src="img/ic_descarga.png" alt=""><span>Descargar Informe 2</span></a>
+      <a class="desc" href="#"><img src="img/ic_descarga.png" alt=""><span>Descargar Informe 3</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="quienes">
+  <h2 class="cinta c-rojo">Quiénes lo realizan</h2>
+  <div class="cont texto">
+    <p>El estudio es mandatado por el Gobierno Regional del Maule, a través de su División de Planificación y Desarrollo Regional (DIPLADE), y ejecutado por la Dirección de Extensión y Servicios Externos (DESE UC) de la Facultad de Arquitectura, Diseño y Estudios Urbanos de la Pontificia Universidad Católica de Chile.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="cont"><img src="img/footer_logos.png" alt="Área Metropolitana del Maule y Gobierno del Maule"></div>
+</footer>
+
+<script src="https://js.arcgis.com/4.31/"></script>
+<script>
+  require([
+    "esri/WebMap","esri/views/MapView","esri/rest/locator",
+    "esri/widgets/LayerList","esri/widgets/Legend","esri/widgets/BasemapGallery",
+    "esri/widgets/Expand","esri/widgets/Home","esri/widgets/ScaleBar"
+  ], function(WebMap, MapView, locator, LayerList, Legend, BasemapGallery, Expand, Home, ScaleBar){
+    var estado = document.getElementById("estado");
+    var webmap = new WebMap({ portalItem: { id: "77f5fd410a1049dab78744c059baba0b", portal: { url: "https://ocuc.maps.arcgis.com" } } });
+    var view = new MapView({ container: "viewDiv", map: webmap, navigation: { mouseWheelZoomEnabled: false },
+      popup: { dockEnabled: true, dockOptions: { position: "bottom-right", breakpoint: false } } });
+
+    view.when(function(){
+      estado.remove();
+      var chico = window.matchMedia("(max-width:600px)").matches;
+      var capas = new Expand({ view: view, expandTooltip: "Capas", group: "panel", expanded: !chico,
+        content: new LayerList({ view: view, listItemCreatedFunction: function(e){
+          if (e.item.layer.type !== "group") e.item.panel = { content: "legend", open: false };
+        } }) });
+      var leyenda = new Expand({ view: view, expandTooltip: "Leyenda", group: "panel", content: new Legend({ view: view }) });
+      var fondos = new Expand({ view: view, expandTooltip: "Mapa base", group: "panel", content: new BasemapGallery({ view: view }) });
+      view.ui.add(new Home({ view: view }), "top-left");
+      view.ui.add([capas, leyenda, fondos], "top-right");
+      view.ui.add(new ScaleBar({ view: view, unit: "metric" }), "bottom-left");
+    }, function(err){
+      estado.textContent = "No se pudo cargar el mapa. Verifica que el mapa y sus capas estén compartidos como públicos en ArcGIS Online.";
+      console.error(err);
+    });
+
+    // La rueda del mouse no hace zoom hasta hacer clic en el mapa, para no atrapar el scroll de la página
+    view.on("click", function(){ view.navigation.mouseWheelZoomEnabled = true; });
+    document.getElementById("viewDiv").addEventListener("mouseleave", function(){ view.navigation.mouseWheelZoomEnabled = false; });
+
+    var geocoder = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+    var botones = document.querySelectorAll(".lista-com button");
+    botones.forEach(function(b){
+      b.setAttribute("aria-pressed","false");
+      b.addEventListener("click", function(){
+        botones.forEach(function(o){ o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+        locator.addressToLocations(geocoder, {
+          address: { address: b.dataset.c + ", Región del Maule, Chile" },
+          countryCode: "CHL", categories: ["City"], maxLocations: 1, outFields: ["*"]
+        }).then(function(r){
+          if (!r.length) return;
+          var t = r[0].extent ? r[0].extent.expand(1.3) : { target: r[0].location, zoom: 11 };
+          view.goTo(t, { duration: 900 });
+        }).catch(function(e){ console.warn(e); });
+      });
+    });
+  });
+</script>
+</body>
+</html>
